@@ -1,10 +1,11 @@
 const BandList = require("./band-list");
+const TicketList = require("./ticket-list");
 
 class Sockets {
   constructor(io) {
     this.io = io;
     this.bandList = new BandList();
-
+    this.ticketList = new TicketList();
     this.socketEvents();
   }
 
@@ -32,6 +33,18 @@ class Sockets {
       socket.on("add-band", ({ name }) => {
         this.bandList.addBand(name);
         this.io.emit("current-bands", this.bandList.getBands());
+      });
+
+      socket.on("create-ticket", (_, callback) => {
+        const newTicket = this.ticketList.createTicket();
+        callback(newTicket);
+      });
+
+      socket.on("next-ticket", ({ agent, desk }, callback) => {
+        const myTicket = this.ticketList.assignTicket(agent, desk);
+        callback(myTicket);
+
+        this.io.emit("last13", this.ticketList.last13);
       });
     });
   }

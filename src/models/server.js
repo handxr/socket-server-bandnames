@@ -15,22 +15,31 @@ class Server {
     this.io = socketio(this.server, {
       /* options */
     });
+
+    this.sockets = new Sockets(this.io);
   }
 
   middlewares() {
     this.app.use(express.static(path.resolve(__dirname, "../public")));
 
     this.app.use(cors());
+
+    this.app.get("/tickets", (req, res) => {
+      res.json({
+        ok: true,
+        result: this.sockets.ticketList.last13,
+      });
+    });
   }
 
-  socketsConfig() {
-    new Sockets(this.io);
-  }
+  // socketsConfig() {
+  //   new Sockets(this.io);
+  // }
 
   execute() {
     this.middlewares();
 
-    this.socketsConfig();
+    // this.socketsConfig();
 
     this.server.listen(this.port, () => {
       console.log("Server is running on port 8080");
